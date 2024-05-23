@@ -9,6 +9,7 @@ import { EllipsisOutlined, HeartOutlined, HeartTwoTone, MessageOutlined, Retweet
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
+import FollowButton from "./FollowButton";
 import { REMOVE_POST_OF_ME } from "../reducers/user";
 
 const PostCard = ({ post }: { post: IPost }) => {
@@ -54,6 +55,7 @@ const PostCard = ({ post }: { post: IPost }) => {
 						<EllipsisOutlined />
 					</Popover>,
 				]}
+				extra={id && <FollowButton post={post} />}
 			>
 				<Card.Meta avatar={<Avatar>{post.User.nickname[0]}</Avatar>} title={post.User.nickname} description={<PostCardContent postData={post.content} />} />
 			</Card>
@@ -65,11 +67,9 @@ const PostCard = ({ post }: { post: IPost }) => {
 						itemLayout="horizontal"
 						dataSource={post.Comments}
 						renderItem={(item) => (
-							<li>
-								<List.Item>
-									<List.Item.Meta title={item.User.nickname} avatar={<Avatar>{post.User.nickname[0]}</Avatar>} description={item.content} />
-								</List.Item>
-							</li>
+							<List.Item>
+								<List.Item.Meta title={item.User.nickname} avatar={<Avatar>{post.User.nickname[0]}</Avatar>} description={item.content} />
+							</List.Item>
 						)}
 					/>
 				</div>

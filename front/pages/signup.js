@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
+import Router from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 
-import useInput from "../components/hooks/useInput";
+import useInput from "../hooks/useInput";
 import AppLayout from "../components/AppLayout";
 
 import styled from "styled-components";
@@ -22,7 +23,19 @@ const Signup = () => {
 	const [term, setTerm] = useState("");
 	const [termError, setTermError] = useState(false);
 	const dispatch = useDispatch();
-	const { signUpLoading } = useSelector((state) => state.user);
+	const { signUpLoading, signUpDone, signUpError, me } = useSelector((state) => state.user);
+
+	useEffect(() => {
+		if (me) {
+			Router.replace("/");
+		}
+	}, [me]);
+	useEffect(() => {
+		if (signUpDone) Router.replace("/");
+	}, [signUpDone]);
+	useEffect(() => {
+		if (signUpError) alert(signUpError);
+	}, [signUpError]);
 
 	const onChangePasswordCheck = useCallback(
 		(event) => {
@@ -47,7 +60,10 @@ const Signup = () => {
 		}
 		console.log(email, nickname, password);
 
-		dispatch({ type: SIGN_UP_REQUEST, data: { email, password, nickname } });
+		dispatch({
+			type: SIGN_UP_REQUEST,
+			data: { email, password, nickname },
+		});
 	}, [password, passwordCheck, term]);
 
 	return (

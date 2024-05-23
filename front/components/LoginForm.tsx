@@ -1,4 +1,4 @@
-import { FormEventHandler, useCallback, useMemo } from "react";
+import { FormEventHandler, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -16,9 +16,16 @@ const LoginForm = () => {
 	const dispatch = useDispatch();
 	const [email, onChangeEmail] = useInput("");
 	const [password, onChangePassword] = useInput("");
-	const { logInLoading } = useSelector((state) => state.user);
+	const { logInLoading, logInError } = useSelector((state) => state.user);
 
 	const buttonWrapperStyle = useMemo(() => ({ marginTop: 10 }), []);
+
+	useEffect(() => {
+		if (logInError) {
+			console.log("error", logInError);
+			alert(logInError);
+		}
+	}, [logInError]);
 
 	const onSubmitForm: FormEventHandler = useCallback(() => {
 		dispatch(loginRequestAction({ email, password }));
