@@ -20,25 +20,25 @@ export const initialState = {
 	addCommentError: null,
 };
 
-export const generateDummyPost = (number) =>
-	new Array(number).fill().map((v, i) => ({
-		id: shortId.generate(),
-		User: {
-			id: shortId.generate(),
-			nickname: faker.person.firstName(),
-		},
-		content: faker.lorem.paragraphs(),
-		Images: [{ src: faker.image.url() }],
-		Comments: [
-			{
-				User: {
-					id: shortId.generate(),
-					nickname: faker.person.firstName(),
-				},
-				content: faker.lorem.sentence(),
-			},
-		],
-	}));
+// export const generateDummyPost = (number) =>
+// 	new Array(number).fill().map((v, i) => ({
+// 		id: shortId.generate(),
+// 		User: {
+// 			id: shortId.generate(),
+// 			nickname: faker.person.firstName(),
+// 		},
+// 		content: faker.lorem.paragraphs(),
+// 		Images: [{ src: faker.image.url() }],
+// 		Comments: [
+// 			{
+// 				User: {
+// 					id: shortId.generate(),
+// 					nickname: faker.person.firstName(),
+// 				},
+// 				content: faker.lorem.sentence(),
+// 			},
+// 		],
+// 	}));
 
 // initialState.mainPosts = initialState.mainPosts.concat(generateDummyPost(10));
 
@@ -116,8 +116,13 @@ const reducer = (state = initialState, action) => {
 			// 	addPostDone: false,
 			// 	addPostError: null,
 			// };
+			case ADD_POST_REQUEST:
+				draft.addPostLoading = true;
+				draft.addPostDone = false;
+				draft.addPostError = null;
+				break;
 			case ADD_POST_SUCCESS:
-				draft.mainPosts.unshift(dummyPost(action.data));
+				draft.mainPosts.unshift(action.data);
 				draft.addPostDone = true;
 				draft.addPostLoading = false;
 				break;
@@ -181,8 +186,9 @@ const reducer = (state = initialState, action) => {
 			// 	addCommentError: null,
 			// };
 			case ADD_COMMENT_SUCCESS:
-				const post = draft.mainPosts.find((v) => v.id === action.data.postId);
-				post.Comments.unshift(dummyComments(post.User.nickname, action.data.content));
+				const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+				// post.Comments.unshift(dummyComments(post.User.nickname, action.data.content));
+				post.Comments.unshift(action.data);
 				draft.addCommentDone = true;
 				draft.addCommentLoading = false;
 				break;

@@ -1,6 +1,6 @@
 import axios from "axios";
 import shortId from "shortid";
-import { all, delay, fork, put, takeLatest, throttle } from "redux-saga/effects";
+import { all, call, delay, fork, put, takeLatest, throttle } from "redux-saga/effects";
 import {
 	ADD_COMMENT_FAILURE,
 	ADD_COMMENT_REQUEST,
@@ -12,26 +12,19 @@ import {
 	LOAD_POSTS_REQUEST,
 	LOAD_POSTS_SUCCESS,
 	REMOVE_POST_REQUEST,
-	generateDummyPost,
 } from "../reducers/post";
 import { ADD_POST_TO_ME } from "../reducers/user";
 
-function loadPostsAPI() {
-	return axios.get("/api/loadposts");
-}
-function addPostAPI() {
-	return axios.post("/api/addpost");
-}
-function addCommentAPI() {
-	return axios.post("/api/addcomment");
+function loadPostsAPI(data) {
+	return axios.get("/posts", data);
 }
 
 function* loadPosts(action) {
 	try {
-		yield delay(1000);
+		const result = yield call(loadPostsAPI, action.data);
 		yield put({
 			type: LOAD_POSTS_SUCCESS,
-			data: generateDummyPost(10),
+			data: result.data,
 		});
 	} catch (error) {
 		yield put({
@@ -40,18 +33,18 @@ function* loadPosts(action) {
 		});
 	}
 }
+
+function addPostAPI(data) {
+	return axios.post("/post", { content: data });
+}
 function* addPost(action) {
 	try {
-		yield delay(1000);
-		// const result = yield call(addPostAPI);
+		const result = yield call(addPostAPI, action.data);
 
 		const id = shortId.generate();
 		yield put({
 			type: ADD_POST_SUCCESS,
-			data: {
-				id,
-				content: action.data,
-			},
+			data: result.data,
 		});
 		yield put({
 			type: ADD_POST_TO_ME,
@@ -84,15 +77,19 @@ function* removePost(action) {
 		});
 	}
 }
+
+function addCommentAPI(data) {
+	return axios.post(`/post/${data.postId}/comment`, data);
+}
 function* addComment(action) {
 	try {
-		yield delay(1000);
-		// const result = yield call(addCommentAPI);
+		const result = yield call(addCommentAPI, action.data);
 		yield put({
 			type: ADD_COMMENT_SUCCESS,
-			data: action.data,
+			data: result.data,
 		});
 	} catch (error) {
+		console.error(error);
 		yield put({
 			type: ADD_COMMENT_FAILURE,
 			data: error.reponse.data,

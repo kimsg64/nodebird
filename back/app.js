@@ -1,11 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan");
 
 const dotenv = require("dotenv");
 dotenv.config();
 
 const userRouter = require("./routes/user");
 const postRouter = require("./routes/post");
+const postsRouter = require("./routes/posts");
 const db = require("./models");
 db.sequelize
 	.sync()
@@ -15,11 +17,15 @@ db.sequelize
 	.catch(console.error());
 
 const app = express();
+app.use(morgan("dev"));
 app.use(
 	cors({
-		// origin: "https://nodebird.com"
-		origin: "*",
-		credentials: false,
+		// origin: "*",
+
+		// origin: "https://nodebird.com",
+		// origin: "https://localhost:3000/",
+		origin: true,
+		credentials: true,
 	})
 );
 app.use(express.json());
@@ -41,6 +47,7 @@ app.get("/", (req, res) => {
 
 app.use("/user", userRouter);
 app.use("/post", postRouter);
+app.use("/posts", postsRouter);
 
 // app.use((err, req, res, next) => {
 

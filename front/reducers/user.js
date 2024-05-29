@@ -1,6 +1,9 @@
 import { produce } from "immer";
 
 export const initialState = {
+	loadUserLoading: false,
+	loadUserError: null,
+	loadUserDone: false,
 	logInLoading: false,
 	logInError: null,
 	logInDone: false,
@@ -23,6 +26,10 @@ export const initialState = {
 	singUpData: {},
 	loginData: {},
 };
+
+export const LOAD_USER_REQUEST = "LOAD_USER_REQUEST";
+export const LOAD_USER_SUCCESS = "LOAD_USER_SUCCESS";
+export const LOAD_USER_FAILURE = "LOAD_USER_FAILURE";
 
 export const LOG_IN_REQUEST = "LOG_IN_REQUEST";
 export const LOG_IN_SUCCESS = "LOG_IN_SUCCESS";
@@ -75,6 +82,20 @@ export const changeNicknameRequestAction = (data) => {
 const reducer = (state = initialState, action) => {
 	return produce(state, (draft) => {
 		switch (action.type) {
+			case LOAD_USER_REQUEST:
+				draft.loadUserLoading = true;
+				draft.loadUserError = null;
+				draft.loadUserDone = false;
+				break;
+			case LOAD_USER_SUCCESS:
+				draft.loadUserLoading = false;
+				draft.loadUserDone = true;
+				draft.me = action.data;
+				break;
+			case LOAD_USER_FAILURE:
+				draft.loadUserLoading = false;
+				draft.loadUserError = action.error;
+				break;
 			case LOG_IN_REQUEST:
 				draft.logInLoading = true;
 				draft.logInError = null;

@@ -6,6 +6,31 @@ const { where } = require("sequelize");
 const { isLoggedIn, isNotLoggedIn } = require("./middlewares");
 const router = express.Router();
 
+router.get("/", async (req, res, next) => {
+	try {
+		const user = await User.findOne({ where: { id: req.user.id } });
+		if (req.user) {
+			// 사용자가 있는 경우
+			const fullUserWithoutPassword = await User.findOne({
+				where: { id: user.id },
+				attributes: { exclude: ["password"] },
+				include: [
+					{ model: Post, attributes: ["id"] },
+					{ model: User, as: "Followings", attributes: ["id"] },
+					{ model: User, as: "Followers", attributes: ["id"] },
+				],
+			});
+			return res.status(200).json(fullUserWithoutPassword);
+		} else {
+			// 사용자가 없는 경우
+			return res.status(200).json(null);
+		}
+	} catch (error) {
+		console.log(error);
+		next(error);
+	}
+});
+
 router.post("/login", isNotLoggedIn, (req, res, next) => {
 	passport.authenticate("local", (serverError, user, clientError) => {
 		if (serverError) {
@@ -58,7 +83,7 @@ router.post("/", isNotLoggedIn, async (req, res, next) => {
 });
 
 router.post("/logout", isLoggedIn, (req, res, next) => {
-	console.log(req.user);
+	console.log("logoutme", req.user);
 	req.logout((err) => {
 		if (err) {
 			return next(err);
