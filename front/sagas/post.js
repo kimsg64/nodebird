@@ -17,19 +17,25 @@ import {
     REMOVE_POST_FAILURE,
     REMOVE_POST_REQUEST,
     REMOVE_POST_SUCCESS,
+    RETWEET_FAILURE,
+    RETWEET_REQUEST,
+    RETWEET_SUCCESS,
     UNLIKE_POST_FAILURE,
     UNLIKE_POST_REQUEST,
     UNLIKE_POST_SUCCESS,
+    UPLOAD_IMAGES_FAILURE,
+    UPLOAD_IMAGES_REQUEST,
+    UPLOAD_IMAGES_SUCCESS,
 } from '../reducers/post';
 import { ADD_POST_TO_ME } from '../reducers/user';
 
-function loadPostsAPI(data) {
-    return axios.get('/posts', data);
+function loadPostsAPI(lastId) {
+    return axios.get(`/posts?lastId=${lastId || 0}`);
 }
 
 function* loadPosts(action) {
     try {
-        const result = yield call(loadPostsAPI, action.data);
+        const result = yield call(loadPostsAPI, action.lastId);
         yield put({
             type: LOAD_POSTS_SUCCESS,
             data: result.data,
@@ -37,31 +43,31 @@ function* loadPosts(action) {
     } catch (error) {
         yield put({
             type: LOAD_POSTS_FAILURE,
-            data: error.reponse.data,
+            error: error.reponse.data,
         });
     }
 }
 
 function addPostAPI(data) {
-    return axios.post('/post', { content: data });
+    return axios.post('/post', data);
 }
 function* addPost(action) {
     try {
         const result = yield call(addPostAPI, action.data);
 
-        const id = shortId.generate();
+        // const id = shortId.generate();
         yield put({
             type: ADD_POST_SUCCESS,
             data: result.data,
         });
         yield put({
             type: ADD_POST_TO_ME,
-            data: id,
+            data: result.data.id,
         });
     } catch (error) {
         yield put({
             type: ADD_POST_FAILURE,
-            data: error.reponse.data,
+            error: error.reponse.data,
         });
     }
 }
@@ -79,7 +85,7 @@ function* removePost(action) {
     } catch (error) {
         yield put({
             type: REMOVE_POST_FAILURE,
-            data: error.reponse.data,
+            error: error.reponse.data,
         });
     }
 }
@@ -98,7 +104,7 @@ function* addComment(action) {
         console.error(error);
         yield put({
             type: ADD_COMMENT_FAILURE,
-            data: error.reponse.data,
+            error: error.reponse.data,
         });
     }
 }
@@ -117,7 +123,7 @@ function* likePost(action) {
         console.error(error);
         yield put({
             type: LIKE_POST_FAILURE,
-            data: error.reponse.data,
+            error: error.reponse.data,
         });
     }
 }
@@ -136,13 +142,52 @@ function* unlikePost(action) {
         console.error(error);
         yield put({
             type: UNLIKE_POST_FAILURE,
-            data: error.reponse.data,
+            error: error.reponse.data,
+        });
+    }
+}
+
+function uploadImagesAPI(data) {
+    return axios.post(`/post/images`, data);
+}
+function* uploadImages(action) {
+    try {
+        const result = yield call(uploadImagesAPI, action.data);
+        yield put({
+            type: UPLOAD_IMAGES_SUCCESS,
+            data: result.data,
+        });
+    } catch (error) {
+        console.error(error);
+        yield put({
+            type: UPLOAD_IMAGES_FAILURE,
+            error: error.reponse.data,
+        });
+    }
+}
+
+function retweetAPI(data) {
+    return axios.post(`/post/${data}/retweet`);
+}
+function* retweet(action) {
+    try {
+        const result = yield call(retweetAPI, action.data);
+        yield put({
+            type: RETWEET_SUCCESS,
+            data: result.data,
+        });
+    } catch (error) {
+        console.error(error);
+        yield put({
+            type: RETWEET_FAILURE,
+            error: error.reponse.data,
         });
     }
 }
 
 function* watchLoadPosts() {
-    yield throttle(5000, LOAD_POSTS_REQUEST, loadPosts);
+    // yield throttle(10000, LOAD_POSTS_REQUEST, loadPosts);
+    yield takeLatest(LOAD_POSTS_REQUEST, loadPosts);
 }
 function* watchAddPost() {
     yield takeLatest(ADD_POST_REQUEST, addPost);
@@ -159,6 +204,12 @@ function* watchLikePost() {
 function* watchUnlikePost() {
     yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
 }
+function* watchUploadImages() {
+    yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
+}
+function* watchRetweet() {
+    yield takeLatest(RETWEET_REQUEST, retweet);
+}
 export default function* postSaga() {
     yield all([
         fork(watchLoadPosts),
@@ -167,5 +218,7 @@ export default function* postSaga() {
         fork(watchAddComment),
         fork(watchLikePost),
         fork(watchUnlikePost),
+        fork(watchUploadImages),
+        fork(watchRetweet),
     ]);
 }

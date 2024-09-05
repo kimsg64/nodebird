@@ -13,4 +13,6 @@ export default interface IPost {
         content: string;
     }[];
     Likers: { id: string }[];
+    RetweetId: number;
+    Retweet: IPost;
 }
