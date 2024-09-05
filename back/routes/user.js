@@ -10,6 +10,7 @@ router.get('/', async (req, res, next) => {
     try {
         if (req.user) {
             const user = await User.findOne({ where: { id: req.user.id } });
+            console.log('check if there is the user', user);
             // 사용자가 있는 경우
             const fullUserWithoutPassword = await User.findOne({
                 where: { id: user.id },
@@ -93,6 +94,82 @@ router.post('/logout', isLoggedIn, (req, res, next) => {
     });
     req.session.destroy();
     res.send('ok');
+});
+
+router.patch('/nickname', isLoggedIn, async (req, res, next) => {
+    try {
+        await User.update({ nickname: req.body.nickname }, { where: { id: req.user.id } });
+        res.status(200).json({ nickname: req.body.nickname });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+router.patch('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.params.userId } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        await user.addFollowers(req.user.id);
+        res.status(200).json({ UserId: +req.params.userId });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.params.userId } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        await user.removeFollowers(req.user.id);
+        res.status(200).json({ UserId: +req.params.userId });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.user.id } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        const followers = await user.getFollowers(req.user.id);
+        res.status(200).json(followers);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.user.id } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        const followings = await user.getFollowings(req.user.id);
+        res.status(200).json(followings);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.user.id } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        await user.removeFollowers(req.params.userId);
+        res.status(200).json({ UserId: +req.params.userId });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
 });
 
 module.exports = router;

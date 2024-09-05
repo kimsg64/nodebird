@@ -23,8 +23,8 @@ app.use(
         // origin: "*",
 
         // origin: "https://nodebird.com",
-        // origin: "https://localhost:3000/",
-        origin: true,
+        origin: 'http://localhost:3000',
+        // origin: true,
         credentials: true,
     })
 );
