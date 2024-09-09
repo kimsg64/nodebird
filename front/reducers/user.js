@@ -1,9 +1,12 @@
 import { produce } from 'immer';
 
 export const initialState = {
-    loadUserLoading: false,
-    loadUserError: null,
-    loadUserDone: false,
+    loadMyInfoLoading: false,
+    loadMyInfoError: null,
+    loadMyInfoDone: false,
+    loadUserInfoLoading: false,
+    loadUserInfoError: null,
+    loadUserInfoDone: false,
     logInLoading: false,
     logInError: null,
     logInDone: false,
@@ -33,13 +36,16 @@ export const initialState = {
     loadFollowingsDone: false,
 
     me: null,
-    singUpData: {},
-    loginData: {},
+    userInfo: null,
 };
 
-export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
-export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
-export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
+export const LOAD_MY_INFO_REQUEST = 'LOAD_MY_INFO_REQUEST';
+export const LOAD_MY_INFO_SUCCESS = 'LOAD_MY_INFO_SUCCESS';
+export const LOAD_MY_INFO_FAILURE = 'LOAD_MY_INFO_FAILURE';
+
+export const LOAD_USER_INFO_REQUEST = 'LOAD_USER_INFO_REQUEST';
+export const LOAD_USER_INFO_SUCCESS = 'LOAD_USER_INFO_SUCCESS';
+export const LOAD_USER_INFO_FAILURE = 'LOAD_USER_INFO_FAILURE';
 
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
 export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
@@ -95,19 +101,33 @@ export const changeNicknameRequestAction = (data) => {
 const reducer = (state = initialState, action) => {
     return produce(state, (draft) => {
         switch (action.type) {
-            case LOAD_USER_REQUEST:
-                draft.loadUserLoading = true;
-                draft.loadUserError = null;
-                draft.loadUserDone = false;
+            case LOAD_MY_INFO_REQUEST:
+                draft.loadMyInfoLoading = true;
+                draft.loadMyInfoError = null;
+                draft.loadMyInfoDone = false;
                 break;
-            case LOAD_USER_SUCCESS:
-                draft.loadUserLoading = false;
-                draft.loadUserDone = true;
+            case LOAD_MY_INFO_SUCCESS:
+                draft.loadMyInfoLoading = false;
+                draft.loadMyInfoDone = true;
                 draft.me = action.data;
                 break;
-            case LOAD_USER_FAILURE:
-                draft.loadUserLoading = false;
-                draft.loadUserError = action.error;
+            case LOAD_MY_INFO_FAILURE:
+                draft.loadMyInfoLoading = false;
+                draft.loadMyInfoError = action.error;
+                break;
+            case LOAD_USER_INFO_REQUEST:
+                draft.loadUserInfoLoading = true;
+                draft.loadUserInfoError = null;
+                draft.loadUserInfoDone = false;
+                break;
+            case LOAD_USER_INFO_SUCCESS:
+                draft.loadUserInfoLoading = false;
+                draft.loadUserInfoDone = true;
+                draft.userInfo = action.data;
+                break;
+            case LOAD_USER_INFO_FAILURE:
+                draft.loadUserInfoLoading = false;
+                draft.loadUserInfoError = action.error;
                 break;
             case LOG_IN_REQUEST:
                 draft.logInLoading = true;

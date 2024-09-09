@@ -13,9 +13,12 @@ import {
     LOAD_FOLLOWINGS_FAILURE,
     LOAD_FOLLOWINGS_REQUEST,
     LOAD_FOLLOWINGS_SUCCESS,
-    LOAD_USER_FAILURE,
-    LOAD_USER_REQUEST,
-    LOAD_USER_SUCCESS,
+    LOAD_MY_INFO_FAILURE,
+    LOAD_MY_INFO_REQUEST,
+    LOAD_MY_INFO_SUCCESS,
+    LOAD_USER_INFO_FAILURE,
+    LOAD_USER_INFO_REQUEST,
+    LOAD_USER_INFO_SUCCESS,
     LOG_IN_FAILURE,
     LOG_IN_REQUEST,
     LOG_IN_SUCCESS,
@@ -33,21 +36,40 @@ import {
     UNFOLLOW_SUCCESS,
 } from '../reducers/user';
 
-function loadUserAPI() {
+function loadMyInfoAPI() {
     return axios.get('/user');
 }
-function* loadUser() {
+function* loadMyInfo() {
     try {
-        const result = yield call(loadUserAPI);
+        const result = yield call(loadMyInfoAPI);
         console.log('this is loaded user', result);
         yield put({
-            type: LOAD_USER_SUCCESS,
+            type: LOAD_MY_INFO_SUCCESS,
             data: result.data,
         });
     } catch (error) {
         console.log('error', error);
         yield put({
-            type: LOAD_USER_FAILURE,
+            type: LOAD_MY_INFO_FAILURE,
+            error: error.response.data,
+        });
+    }
+}
+function loadUserInfoAPI() {
+    return axios.get('/user');
+}
+function* loadUserInfo() {
+    try {
+        const result = yield call(loadUserInfoAPI);
+        console.log('this is loaded user', result);
+        yield put({
+            type: LOAD_USER_INFO_SUCCESS,
+            data: result.data,
+        });
+    } catch (error) {
+        console.log('error', error);
+        yield put({
+            type: LOAD_USER_INFO_FAILURE,
             error: error.response.data,
         });
     }
@@ -215,8 +237,11 @@ function* loadFollowings(action) {
     }
 }
 
-function* watchLoadUser() {
-    yield takeLatest(LOAD_USER_REQUEST, loadUser);
+function* watchLoadMyInfo() {
+    yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
+}
+function* watchLoadUserInfo() {
+    yield takeLatest(LOAD_USER_INFO_REQUEST, loadUserInfo);
 }
 function* watchLogIn() {
     yield takeLatest(LOG_IN_REQUEST, logIn);
@@ -248,7 +273,8 @@ function* watchLoadFollowings() {
 
 export default function* userSaga() {
     yield all([
-        fork(watchLoadUser),
+        fork(watchLoadMyInfo),
+        fork(watchLoadUserInfo),
         fork(watchSignUp),
         fork(watchLogIn),
         fork(watchLogOut),
