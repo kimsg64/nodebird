@@ -11,12 +11,18 @@ import {
     LIKE_POST_FAILURE,
     LIKE_POST_REQUEST,
     LIKE_POST_SUCCESS,
+    LOAD_HASHTAG_POSTS_FAILURE,
+    LOAD_HASHTAG_POSTS_REQUEST,
+    LOAD_HASHTAG_POSTS_SUCCESS,
     LOAD_POST_FAILURE,
     LOAD_POST_REQUEST,
     LOAD_POST_SUCCESS,
     LOAD_POSTS_FAILURE,
     LOAD_POSTS_REQUEST,
     LOAD_POSTS_SUCCESS,
+    LOAD_USER_POSTS_FAILURE,
+    LOAD_USER_POSTS_REQUEST,
+    LOAD_USER_POSTS_SUCCESS,
     REMOVE_POST_FAILURE,
     REMOVE_POST_REQUEST,
     REMOVE_POST_SUCCESS,
@@ -45,6 +51,41 @@ function* loadPosts(action) {
     } catch (error) {
         yield put({
             type: LOAD_POSTS_FAILURE,
+            error: error.reponse.data,
+        });
+    }
+}
+function loadUserPostsAPI(data, lastId) {
+    return axios.get(`/user/${data}?lastId=${lastId || 0}`);
+}
+function* loadUserPosts(action) {
+    try {
+        const result = yield call(loadUserPostsAPI, action.data, action.lastId);
+        yield put({
+            type: LOAD_USER_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch (error) {
+        yield put({
+            type: LOAD_USER_POSTS_FAILURE,
+            error: error.reponse.data,
+        });
+    }
+}
+function loadHashtagPostsAPI(data, lastId) {
+    // get 요청으로 한글이나 특수문자를 보낼 때는 encode가 필요하다
+    return axios.get(`/hashtag/${encodeURIComponent(data)}?lastId=${lastId || 0}`);
+}
+function* loadHashtagPosts(action) {
+    try {
+        const result = yield call(loadHashtagPostsAPI, action.data, action.lastId);
+        yield put({
+            type: LOAD_HASHTAG_POSTS_SUCCESS,
+            data: result.data,
+        });
+    } catch (error) {
+        yield put({
+            type: LOAD_HASHTAG_POSTS_FAILURE,
             error: error.reponse.data,
         });
     }
@@ -210,6 +251,12 @@ function* watchLoadPosts() {
     // yield throttle(10000, LOAD_POSTS_REQUEST, loadPosts);
     yield takeLatest(LOAD_POSTS_REQUEST, loadPosts);
 }
+function* watchLoadUserPosts() {
+    yield takeLatest(LOAD_USER_POSTS_REQUEST, loadUserPosts);
+}
+function* watchLoadHashtagPosts() {
+    yield takeLatest(LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+}
 function* watchLoadPost() {
     yield takeLatest(LOAD_POST_REQUEST, loadPost);
 }
@@ -237,6 +284,8 @@ function* watchRetweet() {
 export default function* postSaga() {
     yield all([
         fork(watchLoadPosts),
+        fork(watchLoadUserPosts),
+        fork(watchLoadHashtagPosts),
         fork(watchLoadPost),
         fork(watchAddPost),
         fork(watchRemovePost),

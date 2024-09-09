@@ -1,11 +1,64 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
-const { User, Post } = require('../models');
+const { User, Post, Image, Comment } = require('../models');
 const { where } = require('sequelize');
 const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 const router = express.Router();
 
+router.get('/:userId/posts', async (req, res, next) => {
+    try {
+        const where = { UserId: req.params.userId };
+        if (+req.query.lastId) {
+            where.id = { [Op.lt]: +req.query.lastId };
+        }
+        const posts = await Post.findAll({
+            where,
+            limit: 10,
+            order: [
+                ['createdAt', 'DESC'],
+                [Comment, 'createdAt', 'DESC'],
+            ],
+            include: [
+                { model: User, attributes: ['id', 'nickname'] },
+                { model: Image },
+                { model: Comment, include: [{ model: User, attributes: ['id', 'nickname'] }] },
+                { model: User, as: 'Likers', attributes: ['id'] },
+                { model: Post, as: 'Retweet', include: [{ model: User, attributes: ['id', 'nickname'] }] },
+            ],
+        });
+        return res.status(200).json(posts);
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.user.id } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        const followers = await user.getFollowers({ limit: +req.query.limit });
+        res.status(200).json(followers);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+    try {
+        const user = await User.findOne({ where: { id: req.user.id } });
+        if (!user) {
+            return res.status(403).send('it is ghost');
+        }
+        const followings = await user.getFollowings({ limit: +req.query.limit });
+        res.status(200).json(followings);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
 router.get('/', async (req, res, next) => {
     try {
         if (req.user) {
@@ -157,32 +210,7 @@ router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
         next(error);
     }
 });
-router.get('/followers', isLoggedIn, async (req, res, next) => {
-    try {
-        const user = await User.findOne({ where: { id: req.user.id } });
-        if (!user) {
-            return res.status(403).send('it is ghost');
-        }
-        const followers = await user.getFollowers(req.user.id);
-        res.status(200).json(followers);
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
-});
-router.get('/followings', isLoggedIn, async (req, res, next) => {
-    try {
-        const user = await User.findOne({ where: { id: req.user.id } });
-        if (!user) {
-            return res.status(403).send('it is ghost');
-        }
-        const followings = await user.getFollowings(req.user.id);
-        res.status(200).json(followings);
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
-});
+
 router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
     try {
         const user = await User.findOne({ where: { id: req.user.id } });

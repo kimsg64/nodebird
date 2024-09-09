@@ -11,6 +11,7 @@ import CommentForm from './CommentForm';
 import PostCardContent from './PostCardContent';
 import FollowButton from './FollowButton';
 import { LIKE_POST_REQUEST, UNLIKE_POST_REQUEST, REMOVE_POST_REQUEST, RETWEET_REQUEST } from '../reducers/post';
+import Link from 'next/link';
 
 const PostCard = ({ post }: { post: IPost }) => {
     const [commentFormOpened, setCommentFormOpened] = useState(false);
@@ -98,14 +99,22 @@ const PostCard = ({ post }: { post: IPost }) => {
                         }
                     >
                         <Card.Meta
-                            avatar={<Avatar>{post.Retweet.User.nickname[0]}</Avatar>}
+                            avatar={
+                                <Link href={`/user/${post.Retweet.User.id}`}>
+                                    <Avatar>{post.Retweet.User.nickname[0]}</Avatar>
+                                </Link>
+                            }
                             title={post.Retweet.User.nickname}
                             description={<PostCardContent postData={post.Retweet.content} />}
                         />
                     </Card>
                 ) : (
                     <Card.Meta
-                        avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+                        avatar={
+                            <Link href={`/user/${post.User.id}`}>
+                                <Avatar>{post.User.nickname[0]}</Avatar>
+                            </Link>
+                        }
                         title={post.User.nickname}
                         description={<PostCardContent postData={post.content} />}
                     />
@@ -122,7 +131,11 @@ const PostCard = ({ post }: { post: IPost }) => {
                             <List.Item>
                                 <List.Item.Meta
                                     title={item.User.nickname}
-                                    avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+                                    avatar={
+                                        <Link href={`/user/${item.User.id}`}>
+                                            <Avatar>{item.User.nickname[0]}</Avatar>
+                                        </Link>
+                                    }
                                     description={item.content}
                                 />
                             </List.Item>

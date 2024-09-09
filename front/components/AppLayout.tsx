@@ -6,16 +6,24 @@ import { Input, Menu, Row, Col } from 'antd';
 
 import UserProfile from './UserProfile';
 import LoginForm from './LoginForm';
+import useInput from '../hooks/useInput';
+import { useCallback } from 'react';
+import { useRouter } from 'next/router';
 
 type Props = { children: React.ReactNode };
 
 const SearchInput = styled(Input.Search)`
-    vertical-align: 'middle';
+    vertical-align: middle;
 `;
 
 const AppLayout = ({ children }: Props) => {
+    const [searchInput, onChangeSearchInput] = useInput('');
+    const router = useRouter();
     const me = useSelector((state) => state.user.me);
 
+    const onSearch = useCallback(() => {
+        router.push(`/hashtag/${searchInput}`);
+    }, [searchInput]);
     return (
         <div>
             <Menu mode="horizontal">
@@ -26,7 +34,7 @@ const AppLayout = ({ children }: Props) => {
                     <Link href="/profile">프로필</Link>
                 </Menu.Item>
                 <Menu.Item>
-                    <SearchInput enterButton />
+                    <SearchInput enterButton value={searchInput} onChange={onChangeSearchInput} onSearch={onSearch} />
                 </Menu.Item>
                 <Menu.Item>
                     <Link href="/signup">회원가입</Link>
