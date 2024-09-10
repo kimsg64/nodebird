@@ -19,7 +19,7 @@ const SearchInput = styled(Input.Search)`
 const AppLayout = ({ children }: Props) => {
     const [searchInput, onChangeSearchInput] = useInput('');
     const router = useRouter();
-    const me = useSelector((state) => state.user.me);
+    const me = useSelector((state) => state?.user?.me);
 
     const onSearch = useCallback(() => {
         router.push(`/hashtag/${searchInput}`);

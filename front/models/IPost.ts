@@ -15,4 +15,5 @@ export default interface IPost {
     Likers: { id: string }[];
     RetweetId: number;
     Retweet: IPost;
+    createdAt: Date;
 }
