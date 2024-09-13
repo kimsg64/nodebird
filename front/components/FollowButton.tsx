@@ -2,10 +2,11 @@ import { useCallback } from 'react';
 import { Button } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { FOLLOW_REQUEST, UNFOLLOW_REQUEST } from '../reducers/user';
+import { RootState } from '../store/configureStore';
 
 const FollowButton = ({ post }) => {
     const dispatch = useDispatch();
-    const { me, followLoading, unfollowLoading } = useSelector((state) => state.user);
+    const { me, followLoading, unfollowLoading } = useSelector((state: RootState) => state.user);
     const isFollowing = me?.Followings?.find((v) => v.id === post.User.id);
     const onClickButton = useCallback(() => {
         // console.log('me', me);

@@ -4,13 +4,14 @@ import useInput from '../hooks/useInput';
 
 import { Button, Form, Input } from 'antd';
 import { UPLOAD_IMAGES_REQUEST, REMOVE_IMAGE, ADD_POST_REQUEST } from '../reducers/post';
+import { RootState } from '../store/configureStore';
 
 const PostForm = () => {
     const [text, onChangeText, setText] = useInput('');
-    const { imagePaths } = useSelector((state) => state.post);
+    const { imagePaths } = useSelector((state: RootState) => state.post);
     const imageInput = useRef<HTMLInputElement>();
     const dispatch = useDispatch();
-    const { addPostDone } = useSelector((state) => state.post);
+    const { addPostDone } = useSelector((state: RootState) => state.post);
 
     useEffect(() => {
         if (addPostDone) setText('');

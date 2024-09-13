@@ -14,13 +14,14 @@ import { LIKE_POST_REQUEST, UNLIKE_POST_REQUEST, REMOVE_POST_REQUEST, RETWEET_RE
 import Link from 'next/link';
 
 import moment from 'moment';
+import { RootState } from '../store/configureStore';
 moment.locale('ko');
 
 const PostCard = ({ post }: { post: IPost }) => {
     const [commentFormOpened, setCommentFormOpened] = useState(false);
-    const id = useSelector((state) => state?.user.me?.id);
+    const id = useSelector((state: RootState) => state?.user.me?.id);
     const liked = post.Likers?.find((v) => v.id === id);
-    const { removePostLoading } = useSelector((state) => state.post);
+    const { removePostLoading } = useSelector((state: RootState) => state.post);
     const dispatch = useDispatch();
 
     const onLike = useCallback(() => {

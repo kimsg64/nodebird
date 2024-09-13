@@ -9,6 +9,7 @@ import LoginForm from './LoginForm';
 import useInput from '../hooks/useInput';
 import { useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { RootState } from '../store/configureStore';
 
 type Props = { children: React.ReactNode };
 
@@ -19,7 +20,7 @@ const SearchInput = styled(Input.Search)`
 const AppLayout = ({ children }: Props) => {
     const [searchInput, onChangeSearchInput] = useInput('');
     const router = useRouter();
-    const me = useSelector((state) => state?.user?.me);
+    const me = useSelector((state: RootState) => state?.user?.me);
 
     const onSearch = useCallback(() => {
         router.push(`/hashtag/${searchInput}`);

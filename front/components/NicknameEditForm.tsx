@@ -3,10 +3,11 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useInput from '../hooks/useInput';
 import { CHANGE_NICKNAME_REQUEST } from '../reducers/user';
+import { RootState } from '../store/configureStore';
 
 const NicknameEditForm = () => {
     const formStyle = useMemo(() => ({ marginBottom: 20, border: '1px solid #d9d9d9', padding: 20 }), []);
-    const me = useSelector((state) => state.user);
+    const me = useSelector((state: RootState) => state.user);
     const [nickname, onChangeNickname] = useInput(me?.nickname || '');
     const dispatch = useDispatch();
 

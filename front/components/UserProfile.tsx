@@ -4,10 +4,11 @@ import { logoutRequestAction } from '../reducers/user';
 
 import { Avatar, Button, Card } from 'antd';
 import Link from 'next/link';
+import { RootState } from '../store/configureStore';
 
 const UserProfile = () => {
     const dispatch = useDispatch();
-    const { me, logOutLoading } = useSelector((state) => state.user);
+    const { me, logOutLoading } = useSelector((state: RootState) => state.user);
 
     const onLogout = useCallback(() => {
         dispatch(logoutRequestAction);

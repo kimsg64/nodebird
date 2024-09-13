@@ -9,7 +9,7 @@ export default interface IPost {
         src: string;
     }[];
     Comments: {
-        User: { nickname: string };
+        User: { nickname: string; id: number };
         content: string;
     }[];
     Likers: { id: string }[];

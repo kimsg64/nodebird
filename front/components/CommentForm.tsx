@@ -6,13 +6,14 @@ import IPost from '../models/IPost';
 
 import { Button, Form, Input } from 'antd';
 import { ADD_COMMENT_REQUEST } from '../reducers/post';
+import { RootState } from '../store/configureStore';
 
 const CommentForm = ({ post }: { post: IPost }) => {
     const [commentText, onChangeCommentText, setCommentText] = useInput('');
     const dispatch = useDispatch();
 
-    const id = useSelector((state) => state?.user.me?.id);
-    const { addCommentDone, addCommentLoading } = useSelector((state) => state.post);
+    const id = useSelector((state: RootState) => state?.user.me?.id);
+    const { addCommentDone, addCommentLoading } = useSelector((state: RootState) => state.post);
 
     useEffect(() => {
         if (addCommentDone) setCommentText('');

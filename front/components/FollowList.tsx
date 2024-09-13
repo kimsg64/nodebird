@@ -3,7 +3,12 @@ import { StopOutlined } from '@ant-design/icons';
 import { UNFOLLOW_REQUEST, REMOVE_FOLLOWER_REQUEST } from '../reducers/user';
 import { useDispatch } from 'react-redux';
 
-type Props = { header: string; data: { nickname: string }[]; onClickMore: () => {}; loading: boolean };
+type Props = {
+    header: string;
+    data: { nickname: string; id: number }[];
+    onClickMore: () => {};
+    loading: boolean;
+};
 
 const FollowList = ({ header, data, onClickMore, loading }: Props) => {
     const dispatch = useDispatch();
