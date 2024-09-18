@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { MouseEventHandler, useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import IPost from '../models/IPost';
@@ -10,7 +10,13 @@ import PostImages from './PostImages';
 import CommentForm from './CommentForm';
 import PostCardContent from './PostCardContent';
 import FollowButton from './FollowButton';
-import { LIKE_POST_REQUEST, UNLIKE_POST_REQUEST, REMOVE_POST_REQUEST, RETWEET_REQUEST } from '../reducers/post';
+import {
+    LIKE_POST_REQUEST,
+    UNLIKE_POST_REQUEST,
+    REMOVE_POST_REQUEST,
+    RETWEET_REQUEST,
+    UPDATE_POST_REQUEST,
+} from '../reducers/post';
 import Link from 'next/link';
 
 import moment from 'moment';
@@ -23,6 +29,7 @@ const PostCard = ({ post }: { post: IPost }) => {
     const liked = post.Likers?.find((v) => v.id === id);
     const { removePostLoading } = useSelector((state: RootState) => state.post);
     const dispatch = useDispatch();
+    const [editMode, setEditMode] = useState(false);
 
     const onLike = useCallback(() => {
         if (!id) {
@@ -43,6 +50,25 @@ const PostCard = ({ post }: { post: IPost }) => {
         });
     }, []);
     const onToggleCommentFormOpened = useCallback(() => setCommentFormOpened((prev) => !prev), []);
+    const onClickUpdatePost = useCallback(() => {
+        setEditMode(true);
+    }, []);
+    const onCancelUpdatePost = useCallback(() => {
+        setEditMode(false);
+    }, []);
+    const onChangePost = useCallback(
+        (editText): MouseEventHandler =>
+            () => {
+                dispatch({
+                    type: UPDATE_POST_REQUEST,
+                    data: {
+                        PostId: post.id,
+                        content: editText,
+                    },
+                });
+            },
+        [post]
+    );
     const onRemovePost = useCallback(() => {
         if (!id) {
             return alert('로그인하세요');
@@ -79,7 +105,7 @@ const PostCard = ({ post }: { post: IPost }) => {
                             <Button.Group>
                                 {id && post.User.id === id ? (
                                     <>
-                                        <Button>수정</Button>
+                                        {!post.RetweetId && <Button onClick={onClickUpdatePost}>수정</Button>}
                                         <Button type="dashed" onClick={onRemovePost} loading={removePostLoading}>
                                             삭제
                                         </Button>
@@ -105,12 +131,19 @@ const PostCard = ({ post }: { post: IPost }) => {
                         <span style={{ float: 'right' }}>{moment(post.createdAt).format('YYYY.MM.DD.')}</span>
                         <Card.Meta
                             avatar={
-                                <Link href={`/user/${post.Retweet.User.id}`}>
+                                <Link href={`/user/${post.Retweet.User.id}`} prefetch={false}>
                                     <Avatar>{post.Retweet.User.nickname[0]}</Avatar>
                                 </Link>
                             }
                             title={post.Retweet.User.nickname}
-                            description={<PostCardContent postData={post.Retweet.content} />}
+                            description={
+                                <PostCardContent
+                                    editMode={editMode}
+                                    onChangePost={onChangePost}
+                                    onCancelUpdatePost={onCancelUpdatePost}
+                                    postData={post.Retweet.content}
+                                />
+                            }
                         />
                     </Card>
                 ) : (
@@ -118,12 +151,19 @@ const PostCard = ({ post }: { post: IPost }) => {
                         <span style={{ float: 'right' }}>{moment(post.createdAt).format('YYYY.MM.DD.')}</span>
                         <Card.Meta
                             avatar={
-                                <Link href={`/user/${post.User.id}`}>
+                                <Link href={`/user/${post.User.id}`} prefetch={false}>
                                     <Avatar>{post.User.nickname[0]}</Avatar>
                                 </Link>
                             }
                             title={post.User.nickname}
-                            description={<PostCardContent postData={post.content} />}
+                            description={
+                                <PostCardContent
+                                    editMode={editMode}
+                                    onChangePost={onChangePost}
+                                    onCancelUpdatePost={onCancelUpdatePost}
+                                    postData={post.content}
+                                />
+                            }
                         />
                     </>
                 )}
@@ -140,7 +180,7 @@ const PostCard = ({ post }: { post: IPost }) => {
                                 <List.Item.Meta
                                     title={item.User.nickname}
                                     avatar={
-                                        <Link href={`/user/${item.User.id}`}>
+                                        <Link href={`/user/${item.User.id}`} prefetch={false}>
                                             <Avatar>{item.User.nickname[0]}</Avatar>
                                         </Link>
                                     }

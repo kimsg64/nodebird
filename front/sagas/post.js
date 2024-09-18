@@ -32,6 +32,9 @@ import {
     UNLIKE_POST_FAILURE,
     UNLIKE_POST_REQUEST,
     UNLIKE_POST_SUCCESS,
+    UPDATE_POST_FAILURE,
+    UPDATE_POST_REQUEST,
+    UPDATE_POST_SUCCESS,
     UPLOAD_IMAGES_FAILURE,
     UPLOAD_IMAGES_REQUEST,
     UPLOAD_IMAGES_SUCCESS,
@@ -129,6 +132,24 @@ function* addPost(action) {
     } catch (error) {
         yield put({
             type: ADD_POST_FAILURE,
+            error: error.reponse.data,
+        });
+    }
+}
+function updatePostAPI(data) {
+    return axios.patch(`/post/${data.PostId}`, data);
+}
+function* updatePost(action) {
+    try {
+        const result = yield call(updatePostAPI, action.data);
+
+        yield put({
+            type: UPDATE_POST_SUCCESS,
+            data: result.data,
+        });
+    } catch (error) {
+        yield put({
+            type: UPDATE_POST_FAILURE,
             error: error.reponse.data,
         });
     }
@@ -263,6 +284,9 @@ function* watchLoadPost() {
 function* watchAddPost() {
     yield takeLatest(ADD_POST_REQUEST, addPost);
 }
+function* watchUpdatePost() {
+    yield takeLatest(UPDATE_POST_REQUEST, updatePost);
+}
 function* watchRemovePost() {
     yield takeLatest(REMOVE_POST_REQUEST, removePost);
 }
@@ -288,6 +312,7 @@ export default function* postSaga() {
         fork(watchLoadHashtagPosts),
         fork(watchLoadPost),
         fork(watchAddPost),
+        fork(watchUpdatePost),
         fork(watchRemovePost),
         fork(watchAddComment),
         fork(watchLikePost),

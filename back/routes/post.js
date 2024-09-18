@@ -93,7 +93,7 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
 
 router.post('/images', isLoggedIn, upload.array('image'), async (req, res, next) => {
     console.log(req.files);
-    res.json(req.files.map((v) => v.location));
+    res.json(req.files.map((v) => v.location.replace(/\/original\//, '/thumb/')));
     // res.json(req.files.map((v) => v.filename));
 });
 router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
@@ -271,6 +271,23 @@ router.delete('/:postId/like', isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.patch('/:postId', isLoggedIn, async (req, res, next) => {
+    try {
+        await Post.update({ content: req.body.content }, { where: { id: req.params.postId, UserId: req.user.id } });
+        const hashtags = req.body.content.match(/#[^\s#]+/g);
+        const post = await Post.findOne({ where: { id: req.params.postId } });
+        if (hashtags) {
+            const result = await Promise.all(
+                hashtags.map((tag) => Hashtag.findOrCreate({ where: { name: tag.slice(1).toLowerCase() } }))
+            );
+            await post.addHashtags(result.map((v) => v[0]));
+        }
+        res.status(200).json({ PostId: +req.params.postId, content: req.body.content });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
 router.delete('/:postId', isLoggedIn, async (req, res, next) => {
     try {
         await Post.destroy({
